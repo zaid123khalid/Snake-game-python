@@ -5,23 +5,75 @@ import sqlite3
 
 import consts
 
+
 class Board:
     fps = pygame.time.Clock()
     game_window = pygame.display.set_mode((consts.window_x, consts.window_y))
-    
-    def mode(self, speed, scr, main_menu, difficulty):
+
+    def __init__(self, menu, smallfont, mediumfont, largefont) -> None:
+        self.smallfont = smallfont
+        self.mediumfont = mediumfont
+
+        self.largefont = largefont
+
+        self.main_menu = menu
+
+    def text_objects(self, text, color, size):
+        if size == "small":
+            textsurface = self.smallfont.render(text, True, color)
+        if size == "medium":
+            textsurface = self.mediumfont.render(text, True, color)
+        if size == "large":
+            textsurface = self.largefont.render(text, True, color)
+        return textsurface, textsurface.get_rect()
+
+    def message_screen(self, text, color, y_displace, size="large"):
+        textSurf, textRect = self.text_objects(text, color, size)
+        textRect.center = (consts.window_x /
+                           2), (consts.window_y / 2) + y_displace
+        self.game_window.blit(textSurf, textRect)
+
+    def pause(self):
+
+        paused = True
+
+        while paused:
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_c:
+                        paused = False
+                    if event.key == pygame.K_ESCAPE:
+                        return self.main_menu
+                    if event.key == pygame.K_q:
+                        pygame.quit()
+                        exit()
+
+            self.game_window.fill(consts.black)
+            self.message_screen("Paused", consts.white, -100, size="small")
+            self.message_screen(
+                "Press c to Continue or q to Quit", consts.white, 25, size="small")
+            self.message_screen("Escape to return to main menu",
+                                consts.white, 50, size="small")
+            pygame.display.update()
+            self.fps.tick(5)
+
+    def mode(self, speed, scr, difficulty):
         self.snake_speed = speed
 
         snake_position = [100, 50]
 
         snake_body = [[100, 50],
-                    [90, 50],
-                    [80, 50],
-                    [70, 50]
-                    ]
+                      [90, 50],
+                      [80, 50],
+                      [70, 50]
+                      ]
 
         fruit_position = [random.randrange(1, (consts.window_x // 10)) * 10,
-                        random.randrange(1, (consts.window_y // 10)) * 10]
+                          random.randrange(1, (consts.window_y // 10)) * 10]
 
         fruit_spawn = True
 
@@ -33,21 +85,23 @@ class Board:
         def show_score(choice, color, font, size):
 
             score_font = pygame.font.SysFont(font, size)
-            score_surface = score_font.render('Score : ' + str(self.score), True, color)
+            score_surface = score_font.render(
+                'Score : ' + str(self.score), True, color)
             score_rect = score_surface.get_rect()
             self.game_window.blit(score_surface, score_rect)
 
         def game_over():
 
             my_font = pygame.font.SysFont('times new roman', 50)
-            game_over_surface = my_font.render('Your Score is : ' + str(self.score), True, consts.red)
+            game_over_surface = my_font.render(
+                'Your Score is : ' + str(self.score), True, consts.red)
             game_over_rect = game_over_surface.get_rect()
             game_over_rect.center = (consts.window_x / 2, consts.window_y / 4)
             self.game_window.blit(game_over_surface, game_over_rect)
             pygame.display.flip()
             time.sleep(2)
 
-            return main_menu()
+            return self.main_menu()
 
         while True:
 
@@ -62,7 +116,10 @@ class Board:
                     if event.key == pygame.K_RIGHT:
                         change_to = 'RIGHT'
                     if event.key == pygame.K_ESCAPE:
-                        return main_menu
+                        return self.main_menu
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_p:
+                        self.pause()
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
@@ -94,14 +151,14 @@ class Board:
 
             if not fruit_spawn:
                 fruit_position = [random.randrange(1, (consts.window_x // 10)) * 10,
-                                random.randrange(1, (consts.window_y // 10)) * 10]
+                                  random.randrange(1, (consts.window_y // 10)) * 10]
 
             fruit_spawn = True
             self.game_window.fill(consts.black)
 
             for pos in snake_body:
                 pygame.draw.rect(self.game_window, consts.green,
-                                pygame.Rect(pos[0], pos[1], 10, 10))
+                                 pygame.Rect(pos[0], pos[1], 10, 10))
             pygame.draw.rect(self.game_window, consts.red, pygame.Rect(
                 fruit_position[0], fruit_position[1], 10, 10))
 
@@ -118,7 +175,6 @@ class Board:
             pygame.display.update()
             self.fps.tick(self.snake_speed)
 
-
             if difficulty == 1:
 
                 conn = sqlite3.connect('snake.db')
@@ -133,7 +189,7 @@ class Board:
                 if score2 < self.score:
                     c.execute("DELETE FROM snake WHERE id = 1")
                     c.execute("INSERT INTO snake VALUES(:id, :name, :score)",
-                            {"id": 1, "name": "Easy", "score": self.score})
+                              {"id": 1, "name": "Easy", "score": self.score})
 
                 conn.commit()
                 conn.close()
@@ -152,7 +208,7 @@ class Board:
                 if score2 < self.score:
                     c.execute("DELETE FROM snake WHERE id = 2")
                     c.execute("INSERT INTO snake VALUES(:id, :name, :score)",
-                            {"id": 2, "name": "Medium", "score": self.score})
+                              {"id": 2, "name": "Medium", "score": self.score})
 
                 conn.commit()
                 conn.close()
@@ -171,7 +227,7 @@ class Board:
                 if score2 < self.score:
                     c.execute("DELETE FROM snake WHERE id = 3")
                     c.execute("INSERT INTO snake VALUES(:id, :name, :score)",
-                            {"id": 3, "name": "Hard", "score": self.score})
+                              {"id": 3, "name": "Hard", "score": self.score})
 
                 conn.commit()
                 conn.close()

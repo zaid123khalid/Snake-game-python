@@ -3,6 +3,7 @@ import pygame_menu
 
 import sqlite3
 
+import consts
 from game_board import Board
 
 conn = sqlite3.connect("snake.db")
@@ -17,45 +18,26 @@ conn.close()
 
 pygame.init()
 pygame.display.set_caption('Snakes')
-window_x = 720
-window_y = 480
 
-surface = pygame.display.set_mode((window_x, window_y))
 
-game_window = pygame.display.set_mode((window_x, window_y))
+surface = pygame.display.set_mode((consts.window_x, consts.window_y))
+
+game_window = pygame.display.set_mode((consts.window_x, consts.window_y))
 
 smallfont = pygame.font.SysFont("Algerian", 25)
 mediumfont = pygame.font.SysFont("Algerian", 50)
 largefont = pygame.font.SysFont("Algerian", 80)
 
-
-def text_objects(text, color, size):
-    if size == "small":
-        textsurface = smallfont.render(text, True, color)
-    if size == "medium":
-        textsurface = mediumfont.render(text, True, color)
-    if size == "large":
-        textsurface = largefont.render(text, True, color)
-    return textsurface, textsurface.get_rect()
-
-
-def message_screen(text, color, y_displace, size="large"):
-    textSurf, textRect = text_objects(text, color, size)
-    textRect.center = (window_x / 2), (window_y / 2) + y_displace
-    game_window.blit(textSurf, textRect)
-
-
 def easy():
-
-    Board().mode(speed=10,scr=0,main_menu=main_menu,difficulty=1)
+    Board(main_menu, smallfont, mediumfont,largefont).mode(speed=10,scr=0,difficulty=1)
 
 
 def medium():
-    Board().mode(speed=20,scr=0,main_menu=main_menu,difficulty=2)
+    Board(main_menu, smallfont, mediumfont,largefont).mode(speed=20,scr=0,difficulty=2)
 
 
 def hard():
-    Board().mode(speed=30,scr=0,main_menu=main_menu,difficulty=3)
+    Board(main_menu, smallfont, mediumfont,largefont).mode(speed=30,scr=0,difficulty=3)
 
 def Back():
     return main_menu()
